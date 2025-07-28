@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>Service Worker and Web Push Demo</title>
+</head>
+<body>
+  <h1>Service Worker and Web Push Demo</h1>
+  <p>This is a Service Worker and Web Push demo.</p>
+  <button id="subscribe-btn">Subscribe for web push notifications</button>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(() => console.log('SW installed'))
+        .catch(err => console.error('SW failed', err));
+    }
+    self.addEventListener('push', event => {
+    const data = event.data ? event.data.text() : 'No payload';
+    event.waitUntil(
+      // Check if permission is granted before attempting to show a notification.
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          return self.registration.showNotification('Push Notification', {
+            body: data,
+            icon: '/icon.svg' // Optional
+          });
+        } else {
+          console.warn('Notification permission not granted.');
+          // Optionally handle the case where permission is denied, e.g., show a different message.
+          return Promise.resolve(); // Resolve the promise to prevent the error
+        }
+      })
+    );
+  });
+  
+  document.getElementById('subscribe-btn').addEventListener('click', async () => {
+    if (!('serviceWorker' in navigator)) {
+      alert('Your browser does not support Service Worker');
+      return;
+    }
+    console.log('requesting permission');
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      alert('Please allow notification permission');
+      return;
+    }
+    console.log('permission granted');
+    const reg = await navigator.serviceWorker.ready;
+    // 這裡用 applicationServerKey 做 VAPID，這裡先省略，直接 demo
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        // applicationServerKey: '你的 VAPID 公鑰 (Uint8Array)' // 實際用要加
+      });
+    }
+    alert('Subscribed!');
+    // You can send sub to server
+    console.log('Subscription:', JSON.stringify(sub));
+  });
+  </script>
+</body>
+</html>

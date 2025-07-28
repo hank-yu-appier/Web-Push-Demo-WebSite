@@ -1,0 +1,14 @@
+{
+  "name": "service-worker-demo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "serve ."
+  },
+  "devDependencies": {
+    "serve": "^14.2.0"
+  },
+  "dependencies": {
+    "web-push": "^3.6.7"
+  }
+}
