@@ -15,14 +15,16 @@
         .catch(err => console.error('SW failed', err));
     }
     self.addEventListener('push', event => {
+    console.log('push', event);
     const data = event.data ? event.data.text() : 'No payload';
     event.waitUntil(
       // Check if permission is granted before attempting to show a notification.
       Notification.requestPermission().then(permission => {
         if (permission === 'granted') {
+          console.log('show notification');
           return self.registration.showNotification('Push Notification', {
             body: data,
-            icon: '/icon.svg' // Optional
+            icon: 'https://webpush-sw-demo.netlify.app/appier-logo.svg' // Optional
           });
         } else {
           console.warn('Notification permission not granted.');
